@@ -293,3 +293,25 @@ http://localhost:8080
 ## Screenshots
 
 ![CareerGraph Demo](careergraph-demo.png)
+
+## Main Queries
+
+CareerGraph uses Cypher queries to work with the graph database.
+
+### 1. Get Developer Skills
+
+Retrieves the skills associated with a selected developer.
+
+### 2. Get Career Targets
+
+Retrieves the career roles targeted by a developer.
+
+### 3. Calculate Career Match
+
+Compares a developer's skills with the skills required by a career role and calculates the matching percentage.
+
+The recommendation query uses graph traversal between:
+
+Developer → HAS_SKILL → Skill ← REQUIRES_SKILL ← CareerRole
+
+This allows CareerGraph to identify suitable career roles based on the developer's existing skills.
