@@ -259,6 +259,21 @@ COGNODB_PASSWORD=your-cognodb-password
 
 Do not commit the `.env` file to GitHub.
 
+### CognoDB Setup
+
+1. Create a CognoDB account and create a database instance.
+2. Copy the connection URI and password provided by CognoDB.
+3. Use `cognodb` as the username.
+4. Set the connection details as environment variables.
+
+Example:
+
+```text
+COGNODB_URI=your-cognodb-uri
+COGNODB_USERNAME=cognodb
+COGNODB_PASSWORD=your-cognodb-password
+```
+
 ### Run the Application
 
 ```bash
