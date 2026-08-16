@@ -289,3 +289,7 @@ http://localhost:8080
 Open the following URL in your browser:
 
 http://localhost:8080
+
+## Screenshots
+
+![CareerGraph Demo](careergraph-demo.png)
