@@ -130,32 +130,22 @@ The main relationships are:
 
 
 
-Example:
+### Graph Structure
 
-
-
+```text
 Developer
-
-↓
-
-HAS\_SKILL
-
-↓
-
-Skill
-
-↑
-
-REQUIRES\_SKILL
-
-↑
-
-CareerRole
-
+    │
+    ├── HAS_SKILL ────────> Skill
+    │
+    └── TARGETS ──────────> CareerRole
+                                │
+                                │ REQUIRES_SKILL
+                                ↓
+                              Skill
+```
 
 
 This relationship structure allows CareerGraph to compare developer skills with the skills required by career roles.
-
 
 
 \## Career Recommendation
