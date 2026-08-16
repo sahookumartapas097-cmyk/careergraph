@@ -66,7 +66,7 @@ The application uses CognoDB as the graph database and provides career recommend
 
 
 
-\## Why a Graph Database?
+## Why a Graph Database?
 
 
 
@@ -102,7 +102,7 @@ This makes graph traversal useful for finding suitable career roles based on a d
 
 
 
-\## Data Model
+## Data Model
 
 
 
@@ -110,11 +110,11 @@ The main nodes are:
 
 
 
-\- Developer
+- Developer
 
-\- Skill
+- Skill
 
-\- CareerRole
+- CareerRole
 
 
 
