@@ -248,3 +248,39 @@ careergraph/
 
 └── mvnw.cmd
 
+## Setup and Installation
+
+### Prerequisites
+
+- Java 21
+- Maven
+- CognoDB account
+- Git
+
+### Environment Variables
+
+Create a `.env` file in the project root:
+
+```text
+COGNODB_URI=your-cognodb-uri
+COGNODB_USERNAME=your-cognodb-username
+COGNODB_PASSWORD=your-cognodb-password
+```
+
+Do not commit the `.env` file to GitHub.
+
+### Run the Application
+
+```bash
+mvnw.cmd spring-boot:run
+```
+
+The application will start on:
+
+http://localhost:8080
+
+### Open the Web Interface
+
+Open the following URL in your browser:
+
+http://localhost:8080
