@@ -1,0 +1,33 @@
+<!doctype html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CareerGraph</title>
+<style>
+body{font-family:Arial;margin:0;background:#f4f6f8;color:#172033}header{background:#172033;color:#fff;padding:24px 7%}
+main{max-width:1050px;margin:25px auto;padding:0 18px}.box,.card{background:#fff;border-radius:12px;padding:20px;margin-bottom:18px;box-shadow:0 3px 15px #0001}
+select{width:100%;max-width:400px;padding:10px;border-radius:7px;border:1px solid #ccd} .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px}
+.badge{display:inline-block;background:#eaf2ff;padding:6px 9px;border-radius:15px;margin:3px}.match{font-size:28px;font-weight:bold}.muted{color:#687386}.error{display:none;background:#fee;color:#900;padding:12px;border-radius:8px}
+</style></head><body>
+<header><h1>CareerGraph</h1><p>Developer skills and career recommendations powered by CognoDB</p></header>
+<main>
+<div class="box"><b>Developer</b><br><select id="dev"></select><p id="err" class="error"></p></div>
+<div class="grid"><div class="box"><h2>My Skills</h2><div id="skills"></div></div>
+<div class="box"><h2>Career Targets</h2><div id="targets"></div></div></div>
+<div class="box"><h2>Career Recommendations</h2><div id="recs" class="grid"></div></div>
+</main>
+<script>
+const $=x=>document.getElementById(x);
+async function api(u){let r=await fetch(u);if(!r.ok)throw Error(r.status);return r.json()}
+function fail(){ $("err").style.display="block";$("err").textContent="Database/API unavailable. Check Spring Boot and CognoDB."; }
+async function load(){
+ try{
+  $("err").style.display="none";
+  const id=$("dev").value;
+  const [s,t,r]=await Promise.all([api(`/api/developers/${id}/skills`),api(`/api/developers/${id}/career-roles`),api(`/api/developers/${id}/career-recommendations`)]);
+  $("skills").innerHTML=s.length?s.map(x=>`<span class="badge">${x.name}</span>`).join(""):"No skills assigned.";
+  $("targets").innerHTML=t.length?t.map(x=>`<p><b>${x.title}</b><br><span class=muted>${x.level}</span></p>`).join(""):"No career targets.";
+  $("recs").innerHTML=r.length?r.map(x=>`<div class=card><h3>${x.title}</h3><span class=muted>${x.level}</span><div class=match>${Number(x.matchPercentage).toFixed(0)}%</div><span class=muted>${x.matchedSkills}/${x.totalRequiredSkills} skills matched</span><p>${(x.matchedSkillNames||[]).map(n=>`<span class=badge>✓ ${n}</span>`).join("")}</p></div>`).join(""):"No recommendations.";
+ }catch(e){fail()}
+}
+async function init(){try{let d=await api("/api/developers");$("dev").innerHTML=d.map(x=>`<option value="${x.id}">${x.name||x.id} (${x.id})</option>`).join("");if(d.length)load()}catch(e){fail();$("dev").innerHTML="<option>Database unavailable</option>"}}
+$("dev").onchange=load;init();
+</script></body></html>

@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CareerGraph</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f4f6f8;
+            color: #172033;
+        }
+
+        header {
+            background: #172033;
+            color: white;
+            padding: 28px 7%;
+        }
+
+        header h1 {
+            margin: 0 0 8px;
+        }
+
+        header p {
+            margin: 0;
+            opacity: 0.9;
+        }
+
+        main {
+            max-width: 1050px;
+            margin: 25px auto;
+            padding: 0 18px;
+        }
+
+        .box,
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 18px;
+            box-shadow: 0 3px 15px #0001;
+        }
+
+        select {
+            width: 100%;
+            max-width: 400px;
+            padding: 10px;
+            margin-top: 8px;
+            border-radius: 7px;
+            border: 1px solid #ccd;
+            font-size: 15px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+            gap: 16px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #eaf2ff;
+            padding: 6px 9px;
+            border-radius: 15px;
+            margin: 3px;
+        }
+
+        .match {
+            font-size: 28px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .muted {
+            color: #687386;
+        }
+
+        .error {
+            display: none;
+            background: #fee;
+            color: #900;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 12px;
+        }
+
+        .success {
+            color: #16803c;
+            font-weight: bold;
+        }
+
+        .recommendation {
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>CareerGraph</h1>
+    <p>Developer skills and career recommendations powered by CognoDB</p>
+</header>
+
+<main>
+
+    <!-- Developer -->
+    <div class="box">
+        <b>Developer</b>
+        <br>
+
+        <select id="dev">
+            <option>Loading developers...</option>
+        </select>
+
+        <p id="err" class="error"></p>
+    </div>
+
+
+    <!-- Skills and Career Targets -->
+    <div class="grid">
+
+        <div class="box">
+            <h2>My Skills</h2>
+            <div id="skills">Loading...</div>
+        </div>
+
+        <div class="box">
+            <h2>Career Targets</h2>
+            <div id="targets">Loading...</div>
+        </div>
+
+    </div>
+
+
+    <!-- Recommendations -->
+    <div class="box">
+
+        <h2>Career Recommendations</h2>
+
+        <div id="recs" class="grid">
+            Loading recommendations...
+        </div>
+
+    </div>
+
+</main>
+
+
+<script>
+
+const $ = (id) => document.getElementById(id);
+
+
+/* =====================================================
+   API HELPER
+   ===================================================== */
+
+async function api(url) {
+
+    const response = await fetch(url, {
+        method: "GET",
+        headers: {
+            "Accept": "application/json"
+        },
+        cache: "no-store"
+    });
+
+    if (!response.ok) {
+        throw new Error(
+            "API request failed: " +
+            response.status +
+            " " +
+            response.statusText
+        );
+    }
+
+    return await response.json();
+}
+
+
+/* =====================================================
+   ERROR
+   ===================================================== */
+
+function showError(message) {
+
+    $("err").style.display = "block";
+    $("err").textContent = message;
+}
+
+
+/* =====================================================
+   CLEAR ERROR
+   ===================================================== */
+
+function clearError() {
+
+    $("err").style.display = "none";
+    $("err").textContent = "";
+}
+
+
+/* =====================================================
+   LOAD DEVELOPER DATA
+   ===================================================== */
+
+async function loadDeveloperData() {
+
+    try {
+
+        clearError();
+
+        const developerId = $("dev").value;
+
+        if (!developerId) {
+            return;
+        }
+
+
+        /* ---------------------------------------------
+           Load all three APIs
+           --------------------------------------------- */
+
+        const [
+            skills,
+            targets,
+            recommendations
+        ] = await Promise.all([
+
+            api(
+                `/api/developers/${developerId}/skills`
+            ),
+
+            api(
+                `/api/developers/${developerId}/career-roles`
+            ),
+
+            api(
+                `/api/developers/${developerId}/career-recommendations`
+            )
+
+        ]);
+
+
+        /* ---------------------------------------------
+           MY SKILLS
+           --------------------------------------------- */
+
+        if (Array.isArray(skills) && skills.length > 0) {
+
+            $("skills").innerHTML =
+                skills
+                    .map(skill => `
+                        <span class="badge">
+                            ${skill.name}
+                        </span>
+                    `)
+                    .join("");
+
+        } else {
+
+            $("skills").innerHTML =
+                "No skills assigned.";
+
+        }
+
+
+        /* ---------------------------------------------
+           CAREER TARGETS
+           --------------------------------------------- */
+
+        if (Array.isArray(targets) && targets.length > 0) {
+
+            $("targets").innerHTML =
+                targets
+                    .map(target => `
+                        <p>
+                            <b>${target.title}</b>
+                            <br>
+                            <span class="muted">
+                                ${target.level}
+                            </span>
+                        </p>
+                    `)
+                    .join("");
+
+        } else {
+
+            $("targets").innerHTML =
+                "No career targets.";
+
+        }
+
+
+        /* ---------------------------------------------
+           CAREER RECOMMENDATIONS
+           --------------------------------------------- */
+
+        if (
+            Array.isArray(recommendations) &&
+            recommendations.length > 0
+        ) {
+
+            $("recs").innerHTML =
+                recommendations
+                    .map(recommendation => {
+
+                        /*
+                         * Convert Neo4j/JSON numbers safely
+                         */
+
+                        const totalRequiredSkills =
+                            Number(
+                                recommendation.totalRequiredSkills
+                            ) || 0;
+
+                        const matchedSkills =
+                            Number(
+                                recommendation.matchedSkills
+                            ) || 0;
+
+                        const matchPercentage =
+                            Number(
+                                recommendation.matchPercentage
+                            ) || 0;
+
+
+                        const matchedSkillNames =
+                            Array.isArray(
+                                recommendation.matchedSkillNames
+                            )
+                                ? recommendation.matchedSkillNames
+                                : [];
+
+
+                        return `
+
+                            <div class="card recommendation">
+
+                                <h3>
+                                    ${recommendation.title}
+                                </h3>
+
+                                <span class="muted">
+                                    ${recommendation.level}
+                                </span>
+
+
+                                <div class="match">
+                                    ${matchPercentage.toFixed(0)}%
+                                </div>
+
+
+                                <span class="muted">
+
+                                    ${matchedSkills}
+
+                                    /
+
+                                    ${totalRequiredSkills}
+
+                                    skills matched
+
+                                </span>
+
+
+                                <p>
+
+                                    ${
+                                        matchedSkillNames
+                                            .map(name => `
+                                                <span class="badge">
+                                                    ✓ ${name}
+                                                </span>
+                                            `)
+                                            .join("")
+                                    }
+
+                                </p>
+
+                            </div>
+
+                        `;
+
+                    })
+                    .join("");
+
+        } else {
+
+            $("recs").innerHTML =
+                "No career recommendations.";
+
+        }
+
+    } catch (error) {
+
+        console.error(error);
+
+        showError(
+            "Database/API unavailable. Check Spring Boot and CognoDB."
+        );
+
+        $("skills").innerHTML = "Unable to load skills.";
+        $("targets").innerHTML = "Unable to load career targets.";
+        $("recs").innerHTML = "Unable to load recommendations.";
+    }
+}
+
+
+/* =====================================================
+   LOAD DEVELOPERS
+   ===================================================== */
+
+async function init() {
+
+    try {
+
+        clearError();
+
+        const developers =
+            await api("/api/developers");
+
+
+        if (
+            !Array.isArray(developers) ||
+            developers.length === 0
+        ) {
+
+            $("dev").innerHTML =
+                "<option>No developers found</option>";
+
+            return;
+        }
+
+
+        $("dev").innerHTML =
+            developers
+                .map(developer => `
+                    <option value="${developer.id}">
+                        ${developer.name || developer.id}
+                        (${developer.id})
+                    </option>
+                `)
+                .join("");
+
+
+        /*
+         * Automatically load first developer
+         */
+
+        await loadDeveloperData();
+
+    } catch (error) {
+
+        console.error(error);
+
+        showError(
+            "Unable to load developers. Check Spring Boot and CognoDB."
+        );
+
+        $("dev").innerHTML =
+            "<option>Database unavailable</option>";
+    }
+}
+
+
+/* =====================================================
+   DEVELOPER CHANGE
+   ===================================================== */
+
+$("dev").addEventListener(
+    "change",
+    loadDeveloperData
+);
+
+
+/* =====================================================
+   START APPLICATION
+   ===================================================== */
+
+init();
+
+</script>
+
+</body>
+</html>
